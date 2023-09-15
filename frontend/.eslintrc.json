@@ -1,0 +1,62 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+        "next",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+
+        // 🍪 nextjs related rules from "eslint-config-next" package
+
+        // 🥔 nextjs <Image/> component
+        "@next/next/no-img-element": "off",
+        // 🥔 image alt
+        "jsx-a11y/alt-text": "warn",
+
+        //🍪 react related rules from "eslint-config-next" package
+        
+        // 🥔 key
+        "react/jsx-key": "error",
+        // 🥔 function definition rule for React functional component
+        "react/function-component-definition": [
+            // throw an error with rule is not followed
+            "error",
+            {
+                // Named components (i.e., components with a name) should be defined using function declarations.
+                "namedComponents": "function-declaration"
+            }
+        ],
+        // 🥔 naming convention for React functional component
+        "react/jsx-pascal-case": [
+            // error
+            2,
+            // allowing SCREAMING_SNAKE_CASE
+            {
+                "allowAllCaps": true
+            }
+        ],
+        // 🥔 disabling the rule that warns about certain non-escaped characters in JSX (e.g., '>', '<', '{', '}', and "'")
+        "react/no-unescaped-entities": "off",
+
+
+        // 🍪 react hook related rules from "eslint-config-next" package 
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": [
+            //  ⚠️ temporarily turning it off
+            "off",
+            {
+                // adding hook from react-use package
+                "additionalHooks": "(useUpdateEffect)"
+            }
+        ],
+
+
+        // 🍪 typescript related rules from "@typescript-eslint/eslint-plugin" package 
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/prefer-as-const": "off",
+        "prefer-const": "off",
+        "no-var": "warn"
+    }
+}
