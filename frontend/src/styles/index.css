@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Atma:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Indie+Flower&family=Kaushan+Script&family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Bengali:wght@100;200;300;400;500;600;700;800;900&family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Serif+Bengali:wght@100;200;300;400;500;600;700;800;900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik+80s+Fade&family=Rubik+Maze&family=Rubik+Vinyl&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Yatra+One&display=swap');
+
+
+
+
+
+
+
+
+
+
+
+/* ✅ Typography ✅ */
+
+
+
+/* 🎉 By default, using same font-family for all the html tag and you can see that above.
+
+But if you want to use different font-family, you can use the following classes.*/
+
+
+
+._font_monospace {
+
+  font-family: 'Source Code Pro', monospace;
+
+}
+
+
+._font_lobster {
+
+  font-family: 'Lobster Two', cursive;
+
+}
+
+._font_train {
+
+  font-family: 'Train One', cursive;
+
+}
+
+._font_yatra {
+
+  font-family: 'Yatra One', cursive;
+
+}
+
+
+
+
+
+/* 🍪 font-weight 🍪 */
+
+h1, h2, h3, h4, ._h1, ._h2, ._h3, ._h4{
+
+  font-weight: 500;
+
+}
+
+
+p, h5, h6, ._p, ._h5, ._h6{
+
+  font-weight: 400;
+
+}
+
+
+
+/* 🍪 letter-spacing 🍪*/
+
+
+/* 
+🎉 letter-spacing guide:
+
+- add letter-spacing to all uppercase text
+- letter-spacing is really important when small text is uppercase
+- sometimes letter-spacing can be useful when the font-size gets small (less than 16px)
+
+
+🎉 It's important to try and see what number is working better for  letter-spacing.
+ */
+
+
+h1, ._h1 {
+
+  letter-spacing: 0.004em;
+
+}
+
+
+h2, h3, h4, ._h2, _.h3, ._h4{
+
+  letter-spacing: 0.005em;
+
+}
+
+
+p,  ._p {
+
+  letter-spacing: 0.001em;
+
+}
+
+
+h5, ._h5 {
+
+    letter-spacing: 0.002.5em;
+
+}
+
+
+h6, ._h6{
+
+  letter-spacing: 0.003em;
+
+}
+
+
+
+
+/* 🍪 line-height 🍪 */
+
+
+
+/* 
+
+🎉 line-height guide:
+
+- there is no perfect default. Many things influence how you should set your line-height, such as: the font that you are using, the size of the font, the length of the line
+- paragraph text should have a line-height of 1.4–1.6, give or take.
+- but for heading, 1.4-1.6 would be way too much. Big fonts should have a tight line-height.
+- uppercase text should have a tighter line-height than regular text
+
+
+🎉 It's important to try and see what number is working better for line-height and letter-spacing.
+
+*/
+
+
+
+
+h1, ._h1 {
+    
+  line-height: 1.1;
+
+}
+
+
+h2, ._h2 {
+  
+  line-height: 1.2;
+
+}
+
+
+
+h3, _.h3{
+
+  line-height: 1.25;
+
+}
+
+
+
+h4, ._h4 {
+
+  line-height: 1.3;
+
+}
+
+
+p,  ._p {
+
+  line-height: 1.5;
+
+}
+
+
+h5, ._h5 {
+
+    line-height: 1.52;
+
+}
+
+
+h6, ._h6{
+
+  line-height: 1.55;
+
+}
+
+
+/* 🎉 When you are using h1, h2, h3, h4 for heading, make sure to have margin-bottom. 
+
+Because for bigger font-sizes(h1, h2, h3, h4), I have selected smaller line-height so that If I have to write couple of lines with those bigger font-sizes, those couple of lines look good. */
+
+
+
+
+._text_margin_sm {
+  margin-bottom: 0.75rem;
+}
+
+
+._text_margin {
+  margin-bottom: 1rem;
+}
+
+
+._text_margin_lg {
+  margin-bottom: 1.25rem;
+}
+
+
+._text_margin_xl {
+  margin-bottom: 1.5rem;
+}
+
+
+._text_margin_2xl {
+  margin-bottom: 1.75rem;
+}
+
+
+._text_margin_3xl {
+  margin-bottom: 2rem;
+}
+
+
+
+
+
+
+
+
+
