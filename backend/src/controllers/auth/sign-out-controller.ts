@@ -8,6 +8,7 @@ import { Request, Response, NextFunction } from 'express'
 
 
 // utils
+import clear_cookie from '../../utils/cookie/clear-cookie.js'
 import success_response from '../../utils/success-response/success-response.js'
 
 
@@ -34,8 +35,15 @@ ____________________________________________*/
 const sign_out_the_user = tryCatchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     // Clear the access_token cookie
-    res.clearCookie('access_token')
-    res.clearCookie('user_info')
+    clear_cookie({
+        res:res,
+        cookie_name:'access_token'
+    })
+    clear_cookie({
+        res:res,
+        cookie_name:'user_info'
+    })
+
 
     /* 🥪 success response 🥪*/
     return success_response({

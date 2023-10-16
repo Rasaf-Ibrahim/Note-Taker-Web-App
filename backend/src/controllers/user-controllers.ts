@@ -22,7 +22,7 @@ import user_model from '../models/user-model.js';
 
 // utils
 import queries_for_fetch_all_request from '../utils/fetch-helpers/queries-for-fetch-all-request/queries-for-fetch-all-request.js'
-import send_cookie from '../utils/send-cookie/send-cookie.js'
+import send_cookie from '../utils/cookie/send-cookie.js'
 import success_response from '../utils/success-response/success-response.js'
 import { success_response_for_fetch_all_request } from '../utils/fetch-helpers/success-response-for-fetch-all-request.js'
 import is_the_username_unique from '../utils/username/is_the_username_unique.js'
@@ -181,7 +181,7 @@ const update_a_user_document = tryCatchAsync(async (req: any, res: Response, nex
 
 
 
-   
+
 
     // 🥪 if username is passed in the req.body, check if the username is unique or not. 
     if (req.body.username) {

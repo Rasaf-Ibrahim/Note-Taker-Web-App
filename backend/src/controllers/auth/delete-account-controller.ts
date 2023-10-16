@@ -16,6 +16,7 @@ import rte_note_model from '../../models/rte-note-model.js'
 
 // utils
 import tryCatchAsync from '../../error-handlers/try-catch-async.js'
+import clear_cookie from '../../utils/cookie/clear-cookie.js'
 import success_response from '../../utils/success-response/success-response.js'
 import error_response from '../../error-handlers/error-response/error-response.js'
 
@@ -78,8 +79,15 @@ const delete_account = tryCatchAsync(async (req: type_of_request_with_user_id, r
 
 
     // 🫓 Clear the access_token & user_info cookie
-    res.clearCookie('access_token');
-    res.clearCookie('user_info');
+    clear_cookie({
+        res:res,
+        cookie_name:'access_token'
+    })
+    clear_cookie({
+        res:res,
+        cookie_name:'user_info'
+    })
+
 
 
     // 🫓 Success response

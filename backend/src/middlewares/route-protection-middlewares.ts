@@ -18,7 +18,8 @@ import user_model from '../models/user-model.js'
 import tryCatchAsync from '../error-handlers/try-catch-async.js'
 import error_response from '../error-handlers/error-response/error-response.js'
 import config_obj from '../config/index.js'
-import send_cookie from '../utils/send-cookie/send-cookie.js'
+import clear_cookie from '../utils/cookie/clear-cookie.js'
+import send_cookie from '../utils/cookie/send-cookie.js'
 
 
 
@@ -45,7 +46,11 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
     if (!token) {
 
         // first make sure that browser still doesn't have "user_info" cookie, otherwise frontend route protection will be compromised!
-        res.clearCookie('user_info')
+        clear_cookie({
+            res:res,
+            cookie_name:'user_info'
+        })
+
 
         // then send json response and return
         return error_response({
@@ -66,6 +71,17 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
     if (!authorized_user) {
 
+        // Clearing invalid cookies from the user's browser
+        clear_cookie({
+            res:res,
+            cookie_name:'user_info'
+        })
+    
+        clear_cookie({
+            res:res,
+            cookie_name:'access_token'
+        })
+
         return error_response({
             next: next,
             status_code: StatusCodes.NOT_FOUND,
@@ -84,6 +100,17 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
 
     if (seven_days_or_more_have_passed) {
+
+        // Clearing invalid cookies from the user's browser
+        clear_cookie({
+            res:res,
+            cookie_name:'user_info'
+        })
+    
+        clear_cookie({
+            res:res,
+            cookie_name:'access_token'
+        })
 
         return error_response({
             next: next,
@@ -193,15 +220,15 @@ const no_sign_in_required = async (req: any, res: Response, next: NextFunction) 
     try {
         /* attempt to decode the JWT token, this verifies the integrity of the token and extracts the payload */
         const decoded: any = await jwt.verify(token, config_obj.env.jwt_access_token_secret);
-        
+
         /* attempt to find a user in the database with the 'user_id' that was decoded from the JWT token */
         const authorized_user = await user_model.findById(decoded.user_id);
 
         /* if no user is found with that 'user_id', proceed to the next middleware or route handler */
         if (!authorized_user) {
             return next();
-        } 
-        
+        }
+
         else {
 
             /* if a user is found with that 'user_id', respond with an error message */
@@ -211,11 +238,11 @@ const no_sign_in_required = async (req: any, res: Response, next: NextFunction) 
                 message: 'This feature is available only for not signed in user. It looks like you are already signed in. Please sign out if you wish to use this feature.'
             })
         }
-    } 
-    
+    }
+
     catch (err) {
         /* if an error occurs (e.g., the token is invalid), it is assumed that the token is invalid token and the user is not signed, so proceed to the next middleware or route handler */
-      
+
         return next()
     }
 }

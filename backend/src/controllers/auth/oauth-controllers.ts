@@ -22,7 +22,8 @@ import user_model from "../../models/user-model.js"
 
 
 // utils
-import send_cookie from "../../utils/send-cookie/send-cookie.js"
+import send_cookie from "../../utils/cookie/send-cookie.js"
+import clear_cookie from "../../utils/cookie/clear-cookie.js"
 import success_response from "../../utils/success-response/success-response.js"
 import generate_unique_username from "../../utils/username/generate-unique-username.js"
 
@@ -99,8 +100,7 @@ const handle_google_oauth_redirect = tryCatchAsync(async (req: Request, res: Res
 
 
     const authorization_code_sent_by_google = req.query.code
-    
-    console.log('authorization_code_sent_by_google', authorization_code_sent_by_google )
+
 
 
     const response_from_google_for_requesting_access_token = await axios.post('https://oauth2.googleapis.com/token', null, {
@@ -168,7 +168,7 @@ ____________________________________________*/
 
 
 const initiate_github_oauth_process = tryCatchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    
+
 
     function generate_url_which_would_initiate_github_oauth_process() {
 
@@ -205,7 +205,7 @@ ____________________________________________*/
 */
 
 const handle_github_oauth_redirect = tryCatchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    
+
 
     const authorization_code_sent_by_github = req.query.code
 
@@ -322,7 +322,7 @@ const handle_oauth_sign_in_or_up = tryCatchAsync(async (req: Request, res: Respo
 
     // 🥪 Check if the user already exists in the database or not
 
-  
+
     let user_document = await user_model.findOne({ email: oauth_user_info.email })
 
 
@@ -347,7 +347,10 @@ const handle_oauth_sign_in_or_up = tryCatchAsync(async (req: Request, res: Respo
 
 
         // 🍔 Delete 'oauth_user_info' cookie
-        res.clearCookie('oauth_user_info')
+        clear_cookie({
+            res: res,
+            cookie_name: 'oauth_user_info'
+        })
 
 
         // 🍔 sending error response
@@ -359,11 +362,13 @@ const handle_oauth_sign_in_or_up = tryCatchAsync(async (req: Request, res: Respo
 
     }
 
-
-
-    // 🥪 if the user exists but with a different provider, we need to send success response with access token and user info 
+    // 🥪 if the user exists and uses the same provider to log in, we need to send a success response with access token and user info 
     else if (user_document && user_document.auth_provider === oauth_user_info.auth_provider) {
 
+        // 🍔 Update last_signed_in_unix_timestamp and last_access_unix_timestamp for existing user
+        user_document.last_signed_in_unix_timestamp = String(Date.now())
+        user_document.last_access_unix_timestamp = String(Date.now())
+        await user_document.save()
 
 
         // 🍔 Send a new access token
@@ -383,7 +388,10 @@ const handle_oauth_sign_in_or_up = tryCatchAsync(async (req: Request, res: Respo
 
 
         // 🍔 Delete 'oauth_user_info' cookie
-        res.clearCookie('oauth_user_info')
+        clear_cookie({
+            res:res,
+            cookie_name:'oauth_user_info'
+        })
 
 
 
@@ -442,7 +450,10 @@ const handle_oauth_sign_in_or_up = tryCatchAsync(async (req: Request, res: Respo
         })
 
         // 🍔 Delete 'oauth_user_info' cookie
-        res.clearCookie('oauth_user_info')
+        clear_cookie({
+            res:res,
+            cookie_name:'oauth_user_info'
+        })
 
 
         // 🍔 send a success response with the user data and access token

@@ -25,7 +25,7 @@ import user_model from '../../models/user-model.js'
 import { hash_password, compare_passwords } from '../../utils/hash-password/hash-password.js'
 import send_mail from '../../utils/send-mail/send-mail.js'
 import success_response from '../../utils/success-response/success-response.js'
-import send_cookie from '../../utils/send-cookie/send-cookie.js'
+import send_cookie from '../../utils/cookie/send-cookie.js'
 import generate_unique_username from '../../utils/username/generate-unique-username.js'
 import generate_otp from '../../utils/generate-otp/generate-otp.js'
 
