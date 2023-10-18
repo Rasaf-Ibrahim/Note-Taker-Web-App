@@ -19,11 +19,10 @@ import { type_of_request_with_user_id } from '../types/type-of-request-with-user
 import rte_note_model from '../models/rte-note-model.js'
 
 
-
 // utils
 import success_response from '../utils/success-response/success-response.js'
 import { success_response_for_fetch_all_request } from '../utils/fetch-helpers/success-response-for-fetch-all-request.js'
-import queries_for_fetch_all_request from '../utils/fetch-helpers/queries-for-fetch-all-request/queries-for-fetch-all-request.js'
+import prepare_mongoose_query_params from '../utils/fetch-helpers/prepare-mongoose-query-params/prepare-mongoose-query-params.js'
 import at_least_value_of_one_property_has_changed from '../utils/update-helpers/at-least-value-of-one-property-has-changed.js'
 
 
@@ -111,7 +110,7 @@ const fetch_all_rte_note_documents_of_a_user = tryCatchAsync(async (req: type_of
     // 🍪 queries 
     let {
         page, limit, skip, select, filter, sort
-    } = queries_for_fetch_all_request({
+    } = prepare_mongoose_query_params({
         req_query: req.query,
         do_not_query_these_fields: ['user_id'] //we can't let a user to query another user's info!
     })
@@ -399,11 +398,70 @@ const delete_rte_note_documents = tryCatchAsync(async (req: type_of_request_with
 
 
 
+/*💡 Controller's Info 💡
+
+    method: GET
+
+    endpoint: '/api/v1/rte-note/bookmark/add-or-remove/:note_id'
+
+    access: sign_in_required, verified_email_required
+*/
+
+
+const add_to_bookmark_or_remove_from_bookmark = tryCatchAsync(async (req: type_of_request_with_user_id, res: Response, next: NextFunction) => {
+
+    // Extract "note_id" and "user_id" from request
+    const {
+        note_id
+    } = req.params
+
+    const user_id = req.user._id
+
+
+    // Check if the document already exists
+    const fetched_document = await rte_note_model.findOne({
+        user_id,
+        _id: note_id
+    })
+
+
+    // If the document doesn't exist
+    if (!fetched_document) {
+
+        return error_response({
+            next: next,
+            status_code: StatusCodes.NOT_FOUND,
+            message: 'No document exits with the provided user id and note id'
+        })
+    }
+
+    // Updated document
+    let updated_document
+
+    // If the note is already bookmarked, unbookmark it. And if the note is not already bookmarked, bookmark it
+    fetched_document.is_bookmarked = !fetched_document.is_bookmarked;
+    updated_document = await fetched_document.save();
+
+
+    // Success response
+    return success_response({
+        res,
+
+
+        message: `Successfully ${updated_document.is_bookmarked === true ? 'bookmarked' : 'unbookmarked'} the note.`,
+    })
+
+})
+
+
+
+
 
 export {
     create_a_rte_note_document,
     fetch_all_rte_note_documents_of_a_user,
     fetch_a_rte_note_document,
     update_a_rte_note_document,
-    delete_rte_note_documents
+    delete_rte_note_documents,
+    add_to_bookmark_or_remove_from_bookmark
 }

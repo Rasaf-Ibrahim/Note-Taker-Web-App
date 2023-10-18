@@ -5,6 +5,7 @@ ____________________________________________*/
 
 // library
 import mongoose from 'mongoose'
+import { boolean } from 'zod'
 
 
 
@@ -25,15 +26,21 @@ const rte_note_schema = new mongoose.Schema({
         required: true
     },
 
-
+   
     description: {
         type: String,
         required: false
     },
 
 
+    
     public_id_of_cloudinary_images: {
         type: [String]
+    },
+
+    is_bookmarked: {
+        type: Boolean,
+        default: false
     }
 
 

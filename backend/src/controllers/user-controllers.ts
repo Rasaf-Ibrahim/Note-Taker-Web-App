@@ -18,10 +18,11 @@ import { type_of_request_with_user_id } from '../types/type-of-request-with-user
 
 
 // model
-import user_model from '../models/user-model.js';
+import user_model from '../models/user-model.js'
+
 
 // utils
-import queries_for_fetch_all_request from '../utils/fetch-helpers/queries-for-fetch-all-request/queries-for-fetch-all-request.js'
+import prepare_mongoose_query_params from '../utils/fetch-helpers/prepare-mongoose-query-params/prepare-mongoose-query-params.js'
 import send_cookie from '../utils/cookie/send-cookie.js'
 import success_response from '../utils/success-response/success-response.js'
 import { success_response_for_fetch_all_request } from '../utils/fetch-helpers/success-response-for-fetch-all-request.js'
@@ -57,7 +58,7 @@ const fetch_all_user_documents = tryCatchAsync(async (req: Request, res: Respons
     /* 🥪 queries 🥪*/
     const {
         page, limit, skip, select, filter, sort
-    } = queries_for_fetch_all_request({
+    } = prepare_mongoose_query_params({
         req_query: req.query,
         do_not_query_these_fields: []
     })
@@ -166,7 +167,6 @@ const update_a_user_document = tryCatchAsync(async (req: any, res: Response, nex
     }
 
 
-
     // 🥪 check whether the user is passing any value in the req body or not 
     if ((Object.keys(req.body).length === 0) && (!req.files || Object.keys(req.files).length === 0)) {
 
@@ -271,7 +271,7 @@ const update_a_user_document = tryCatchAsync(async (req: any, res: Response, nex
         picture_public_id: uploaded_images_info.length !== 0 ? `${uploaded_images_info[0].imagePublicId}` : user_document.picture_public_id
     }
 
-    const options = { new: true, runValidators: true };
+    const options = { new: true, runValidators: true }
 
 
     // 🥪 update the user's document

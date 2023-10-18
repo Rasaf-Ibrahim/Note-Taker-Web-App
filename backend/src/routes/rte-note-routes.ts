@@ -12,7 +12,8 @@ import {
     fetch_all_rte_note_documents_of_a_user,
     fetch_a_rte_note_document,
     update_a_rte_note_document,
-    delete_rte_note_documents
+    delete_rte_note_documents,
+    add_to_bookmark_or_remove_from_bookmark
 } from '../controllers/rte-note-controllers.js'
 
 
@@ -77,6 +78,15 @@ rte_note_routes
         sign_in_required,
         verified_email_required,
         delete_rte_note_documents
+    )
+
+
+rte_note_routes
+    .route('/bookmark/add-or-remove/:note_id')
+    .get(
+        sign_in_required,
+        verified_email_required,
+        add_to_bookmark_or_remove_from_bookmark
     )
 
 
