@@ -1,12 +1,24 @@
-// importing cors library 
+/*__________________________________________
+
+ ✅ import
+____________________________________________*/
+
+// cors library 
 import cors from 'cors'
 
-// importing types
+// types
 import { Express } from 'express'
 import config_obj from '../config/index.js'
 
 
-function cors_middleware(app:Express) {
+
+/*__________________________________________
+
+ ✅ cors_middleware
+____________________________________________*/
+
+
+export default function cors_middleware(app:Express) {
 
     app.use(
         cors({
@@ -18,4 +30,3 @@ function cors_middleware(app:Express) {
 
 
  
-export default cors_middleware

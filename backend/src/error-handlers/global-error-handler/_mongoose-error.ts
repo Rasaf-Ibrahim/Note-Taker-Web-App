@@ -33,7 +33,7 @@ interface ErrorObject {
 const mongoose_error = (err: CustomError): string | void => {
 
 
-
+   
 
 
 
@@ -52,23 +52,26 @@ const mongoose_error = (err: CustomError): string | void => {
             // return a different message depending on the error type
             switch (errorObj.type) {
 
+                
+
                 case 'required':
-                    return  `'${key}' is a required field.` ||errorObj.message 
+                    return  `'${key}' is a required field.` 
 
                 case 'min':
-                    return  `'${key}' must be at least ${errorObj.min}.` || errorObj.message 
+                    return  `'${key}' must be at least ${errorObj.min}.` 
 
                 case 'max':
-                    return `'${key}' must be at most ${errorObj.max}.` || errorObj.message  
+                    return `'${key}' must be at most ${errorObj.max}.`  
 
                 case 'enum':
-                    return `'${key}' must be one of these values: ${errorObj.enumValues.join(', ')}.` || errorObj.message  
+                    return `'${key}' must be one of these values: ${errorObj.enumValues.join(', ')}.`
 
                 case 'regexp':
-                    return `'${key}' must match the format ${errorObj.regexp}.` ||  errorObj.message 
+                    return `'${key}' must match the format ${errorObj.regexp}.`
 
+                // For any other types of error
                 default:
-                    return `Value of ${key} field is missing or invalid.`;
+                    return `${key} field error: ${errorObj.message}`
             }
         })
 
@@ -81,6 +84,7 @@ const mongoose_error = (err: CustomError): string | void => {
 
 
 
+    
 
     // duplicated key
     else if (err.errorObject.code && err.errorObject.code === 11000) {

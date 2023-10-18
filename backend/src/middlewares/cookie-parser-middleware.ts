@@ -1,11 +1,21 @@
-// importing cookie-parser library 
+/*__________________________________________
+
+ ✅ import
+____________________________________________*/
+
+// cookie-parser library 
 import cookieParser from 'cookie-parser';
 
-// importing types
+// types
 import { Express } from 'express'
 
 
-function cookie_parser_middleware(app:Express) {
+/*__________________________________________
+
+ ✅ cookie_parser_middleware
+____________________________________________*/
+
+export default function cookie_parser_middleware(app:Express) {
 
     app.use(
         cookieParser()
@@ -13,5 +23,3 @@ function cookie_parser_middleware(app:Express) {
 }
 
 
- 
-export default cookie_parser_middleware

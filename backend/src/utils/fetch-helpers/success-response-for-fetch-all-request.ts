@@ -63,8 +63,9 @@ export const success_response_for_fetch_all_request = async (payload: type_of_su
         return error_response({
             next: next,
             status_code: 404,
-            message: `No page found with number: ${page}. There are total ${total_pages} pages and each page has ${documents_per_page} documents`
-        });
+            message: `You attempted to access page no.${page}, but it's not available. Total pages available: ${total_pages}, with ${documents_per_page} documents per page.`,
+
+        })
     }
 
 

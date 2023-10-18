@@ -9,7 +9,6 @@ import { StatusCodes } from 'http-status-codes'
 
 // types
 import { Request, Response, NextFunction } from 'express'
-import { type_of_request_with_user_id } from '../types/type-of-request-with-user-id.js'
 
 // model
 import user_model from '../models/user-model.js'
@@ -35,7 +34,6 @@ ____________________________________________*/
 
 const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: NextFunction) => {
 
-
     // 🥪 Check if there is a token in the cookie or not 
     let token
 
@@ -47,10 +45,9 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
         // first make sure that browser still doesn't have "user_info" cookie, otherwise frontend route protection will be compromised!
         clear_cookie({
-            res:res,
-            cookie_name:'user_info'
+            res: res,
+            cookie_name: 'user_info'
         })
-
 
         // then send json response and return
         return error_response({
@@ -73,13 +70,13 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
         // Clearing invalid cookies from the user's browser
         clear_cookie({
-            res:res,
-            cookie_name:'user_info'
+            res: res,
+            cookie_name: 'user_info'
         })
-    
+
         clear_cookie({
-            res:res,
-            cookie_name:'access_token'
+            res: res,
+            cookie_name: 'access_token'
         })
 
         return error_response({
@@ -103,13 +100,13 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
         // Clearing invalid cookies from the user's browser
         clear_cookie({
-            res:res,
-            cookie_name:'user_info'
+            res: res,
+            cookie_name: 'user_info'
         })
-    
+
         clear_cookie({
-            res:res,
-            cookie_name:'access_token'
+            res: res,
+            cookie_name: 'access_token'
         })
 
         return error_response({
@@ -166,8 +163,6 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
     // 🍔  Call the next() to go to next middleware
     next()
 
-
-
 })
 
 
@@ -179,6 +174,7 @@ const sign_in_required = tryCatchAsync(async (req: any, res: Response, next: Nex
 
  ✅ verified_email_required
 ____________________________________________*/
+
 const verified_email_required = tryCatchAsync(async (req, res: Response, next: NextFunction) => {
 
     /* 🥪 checking whether the user's email is verified or not 🥪 */
@@ -204,6 +200,8 @@ const verified_email_required = tryCatchAsync(async (req, res: Response, next: N
 
  ✅ no_sign_in_required middleware
 ____________________________________________*/
+
+
 
 
 const no_sign_in_required = async (req: any, res: Response, next: NextFunction) => {

@@ -1,5 +1,4 @@
 
-
 /*__________________________________________
 
  ✅ import 
@@ -27,16 +26,22 @@ type type_of_numeric_filters = {
  ✅ util
 ____________________________________________*/
 
+
 export default function numeric_filters(payload: type_of_numeric_filters): type_of_obj_with_any_values {
 
+    // 🥪 Payload
     const {
         numeric_filters_extracted_from_query,
         numeric_filterable_fields
     } = payload
 
 
+    // 🥪 Initialize the object which will be returned from the function 
+
     const filter_with_this_obj: type_of_obj_with_any_values = {}
 
+    
+    // 🥪 translate user-friendly queries like "field1>=10,field2<5" into a Mongoose-friendly structure: "field1-$gte-10,field2-$lt-5"
 
     const operator_translation = {
         '>': '$gt',
@@ -64,6 +69,7 @@ export default function numeric_filters(payload: type_of_numeric_filters): type_
     })
 
 
+    // 🥪 return
     return filter_with_this_obj
 }
 

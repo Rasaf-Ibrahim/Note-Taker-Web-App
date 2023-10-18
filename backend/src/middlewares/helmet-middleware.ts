@@ -1,11 +1,21 @@
-// importing helmet library
+/*__________________________________________
+
+ ✅ import
+____________________________________________*/
+
+// helmet library
 import helmet from "helmet"
 
-// importing types
+// types
 import { Express } from 'express'
 
 
-function helmet_middleware (app:Express) {
+/*__________________________________________
+
+ ✅ helmet_middleware
+____________________________________________*/
+
+export default function helmet_middleware (app:Express) {
 
     
 
@@ -20,6 +30,4 @@ function helmet_middleware (app:Express) {
     
 }  
 
-
-export default helmet_middleware
 
