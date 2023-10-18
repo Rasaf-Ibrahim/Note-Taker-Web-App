@@ -71,9 +71,19 @@ export function useCreateNote() {
                 // show error toast
                 const error_message = error.response.data.message
 
-                toast.error(error_message, {
-                    toastId: 'error_message'
-                })
+                if(error_message.includes('title')) {
+                
+                    toast.error('Note title must not be empty.', {
+                        toastId: 'error_message'
+                    })
+                }
+                else {
+
+                    toast.error(error_message, {
+                        toastId: 'error_message'
+                    })
+                }
+               
             }
         }
 

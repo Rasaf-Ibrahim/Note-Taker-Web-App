@@ -9,34 +9,24 @@ import { useQuery } from '@tanstack/react-query';
 // axios instance
 import { axios_note_instance } from './_axios-note-instance'
 
-// note_store
-import { note_store } from "@/store/note-store";
+
 
 /*__________________________________________
 
  ✅ hook 
 ____________________________________________*/
-export function useFetchUserNotes() {
-
-
-    // note store
-    const { sort, limit, page } = note_store(state => ({
-        sort: state?.note?.query_params?.sort,
-        limit: state?.note?.query_params?.limit,
-        page: state?.note?.query_params?.page
-    }))
-
+export function useFetchUserBookmarkedNotes(page) {
 
 
     return useQuery({
 
 
-        queryKey: ["fetch_all_note_of_a_user"],
+        queryKey: ["fetch_all_bookmarked_note_of_a_user"],
 
         queryFn: async () => {
 
             try {
-                const response = await axios_note_instance.get(`/fetch-all-of-a-user/?limit=${limit}&page=${page}&sort=${sort}`)
+                const response = await axios_note_instance.get(`fetch-all-of-a-user?is_bookmarked=true&page=${page}`)
 
                 return response.data
             }
