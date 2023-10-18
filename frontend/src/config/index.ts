@@ -14,9 +14,6 @@ const about_the_site = {
 
 const page_path = {
 
- 
-
-
     // 🍪 public pages
     home_before_login: '/',
 
@@ -53,6 +50,8 @@ const page_path = {
     all_notes: '/all-notes',
     
     create_note: '/create-note',
+
+    bookmarked_notes: '/bookmarked-notes',
 
     read_note: function (id: string) {
         return `/read-note?id=${id}`

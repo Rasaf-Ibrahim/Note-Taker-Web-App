@@ -1,9 +1,8 @@
 
 import { useEffect, useState } from 'react'
 import { auth_store } from '../auth-store'
-import { note_store } from '../note-store/note-store'
+import { note_store } from '../note-store'
 import { theme_store } from './../theme-store'
-
 
 
 

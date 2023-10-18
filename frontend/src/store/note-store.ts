@@ -150,13 +150,10 @@ note_store.subscribe(
 
     (state, prevState) => {
 
-        
-
         // ensuring limit has changed 
         if (state.note.query_params.limit === prevState.note.query_params.limit) return
 
         note_store_actions.note.update_query_param_page('1');
-
 
     }
 
