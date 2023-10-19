@@ -5,15 +5,22 @@
  ✅ import
 ____________________________________________*/
 
+// types
+import { Theme } from '@mui/material'
+
 // config
-import config_obj from '@/config'
+import config_obj from "@/config"
 
 // hook
 import { useEffect } from 'react'
-import { useLogStateInDevEnv } from '@/utils/log/log-state-in-dev-env-hook'
+import { useImmer } from 'use-immer'
 
 // api hook
 import { useCreateNote } from '@/api-calls/note/create-note-hook'
+
+// theme hook
+import { useTheme } from '@mui/material/styles';
+
 
 // next/dynamic
 import dynamic from 'next/dynamic'
@@ -30,24 +37,17 @@ const RichTextEditor = dynamic(
 // import useRichTextEditor from 'rich-text-editor-for-react/hook'
 import useRichTextEditor from 'rich-text-editor-for-react/hook'
 
-// form management hook
-import useFormManagement, { type_of_form_configuration } from "@/utils/global-hooks/use-form-management"
-
-// theme
-import { FormLabel, Stack, Theme, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles';
 
 // mui component
-import { Box, Button, CircularProgress, Paper } from "@mui/material"
+import { Box, Button, CircularProgress, FormLabel, Typography} from "@mui/material"
 
 // styled components
 import CONTAINER___STYLED from '@/components/styled/for-any-project/container'
 
 // reusable components
 import NOTE_NAVIGATION_TABS___REUSABLE from '@/components/reusable/just-for-this-project/note-navigation-tabs'
-import MUI_INPUT___COMPONENT from '@/components/reusable/for-any-project/form/mui-input'
 import MODAL___REUSABLE from '@/components/reusable/for-any-project/modal/modal'
-
+import NOTE_TITLE___REUSABLE from '@/components/reusable/just-for-this-project/note-title'
 
 
 /*__________________________________________
@@ -58,7 +58,7 @@ ____________________________________________*/
 export default function CREATE_NOTE___COMPONENT() {
 
 
-    // 🍪 useRichTextEditor hook
+    // useRichTextEditor hook
     const {
         output,
         fetchOutput,
@@ -80,59 +80,33 @@ export default function CREATE_NOTE___COMPONENT() {
 
 
 
-    // 🍪 theme
+    // theme
     const theme: Theme = useTheme()
 
 
-    // 🍪 useCreateNote
-    const { mutate, isLoading: isSubmittingNote } = useCreateNote()
+    // useCreateNote
+    const { mutate, isLoading: is_loading_while_submitting_the_note } = useCreateNote()
 
 
-    // 🍪 form state management (1/3 Steps) - form_configuration 🍪
-    const form_configuration: type_of_form_configuration = {
-
-        /* 🥔 title  🥔 */
-        title: {
-
-            component_type: 'input',
-
-            value: '',
-
-            is_required: true,
-
-            validation: {
-                is_validating: true,
-                match_pattern: /^[^]{1,60}$/,
-                error_message: "Title can't be longer than 60 characters."
-            }
-
-        }
-
-    }
+    // note title state
+    const [note_title_state, update_note_title_state] = useImmer({
+        value: '',
+        validation_error: false
+    })
 
 
-    // 🍪 form state management (2/2 Steps) - useFormManagement 🍪
-    const {
-        formState,
-        updateFormState,
-        actions,
-        validation_info,
-        validation_before_form_submission_func
 
-    } = useFormManagement(form_configuration)
-
-
-    // 🍪 handleSubmit
+    // handleSubmit
     const handleSubmit = async (event) => {
 
 
-        // 🥔 stop refreshing the page on reload 🥔
+        // stop refreshing the page on reload 
         event.preventDefault()
 
-        /* 🥔 if 'validation_before_form_submission_func' function returns true, that means there is at least one validation error in the form and we can not submit the form 🥔 */
-        if (validation_before_form_submission_func() === true) return
+        // can't submit if note title input field is containing error,
+        if (note_title_state.validation_error) return
 
-        // 🥔 execute image operations 🥔
+        // execute image operations 
         executeImageOperations()
     }
 
@@ -142,9 +116,9 @@ export default function CREATE_NOTE___COMPONENT() {
 
         if (imageOperationsData.outputUpdatedWithImageLink === '') return
 
-        // 🥔 API request  🥔
+        // API request  
         const user_input = {
-            "title": formState.form_data.title.value,
+            "title": note_title_state.value,
             "description": output,
             "public_id_of_cloudinary_images": imageOperationsData.idsOfTheImages
         }
@@ -152,8 +126,10 @@ export default function CREATE_NOTE___COMPONENT() {
         mutate(user_input)
 
 
-        // 🥔 reset form  🥔
-        actions.reset_form()
+        // reset form
+        update_note_title_state((draft) => {
+            draft.value = ''
+        })
         utils.resetEditor()
 
 
@@ -168,13 +144,14 @@ export default function CREATE_NOTE___COMPONENT() {
             <NOTE_NAVIGATION_TABS___REUSABLE />
 
 
-            <CONTAINER___STYLED elevation={{ light: { value: 0 }, dark: { value: 0 } }}
+            <CONTAINER___STYLED elevation={{ light: { value: 1 }, dark: { value: 0 } }}
 
-                background_color={{ light: 1, dark: 1 }}
+                background_color={{ light: 0, dark: 1 }}
 
                 sx={{
                     /* Layout */
-                    margin: { xs: '1rem', sm: '1.5rem', md: '2rem' },
+                    marginX: { xs: '1rem', sm: '1.5rem', md: '2rem' },
+                    marginBottom: { xs: '1rem', sm: '1.5rem', md: '2rem' },
                     padding: { xs: '1rem', sm: '1.5rem', md: '2rem' },
 
                     borderRadius: 2,
@@ -187,23 +164,10 @@ export default function CREATE_NOTE___COMPONENT() {
                 }}>
 
 
-                {/*  note title  */}
-                <MUI_INPUT___COMPONENT
-
-                    label='Note Title'
-
-                    input_name='title'
-
-                    state={formState}
-
-                    actions={actions}
-
-                    validation_info={validation_info}
-
-                    // optional
-                    multiline={false}
-                    variant_value='outlined' //standard, filled, outlined
-
+                {/* note title */}
+                <NOTE_TITLE___REUSABLE
+                    note_title_state={note_title_state}
+                    update_note_title_state={update_note_title_state}
                 />
 
 
@@ -217,7 +181,7 @@ export default function CREATE_NOTE___COMPONENT() {
                     <RichTextEditor
 
                         customizeUI={{
-                            backgroundColor: theme.palette.background.variation_1,
+                            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.variation_1 : theme.palette.background.default,
                             primaryColor: theme.palette.primary.main,
                             stickyToolbarOnScroll: true,
                             defaultVisibleToolbarOptions: {
@@ -230,7 +194,7 @@ export default function CREATE_NOTE___COMPONENT() {
                             acceptableFileFormats: ['png', 'jpg', 'jpeg']
                         }}
 
-                        cloudImageApiEndpoint = {config_obj.env.rte_image_management_api_endpoint}
+                        cloudImageApiEndpoint={config_obj.env.rte_image_management_api_endpoint}
 
                         fetchOutput={fetchOutput}
 
@@ -251,7 +215,7 @@ export default function CREATE_NOTE___COMPONENT() {
 
 
 
-                {/* button */}
+                {/* submit button */}
                 <Button
                     variant='contained'
                     color='secondary'
@@ -264,53 +228,9 @@ export default function CREATE_NOTE___COMPONENT() {
 
 
 
-                {/* Showing non closeable modal when image operation is going on */}
-                <MODAL___REUSABLE
-                    modal_is_open={
-                        // image operation is going on
-                        (imageOperationsData.isProcessing && imageOperationsData.totalUploading > 0)
-
-                        ||
-
-                        // or output is getting updated with the imageLink
-                        imageOperationsData.updatingTheOutputWithImageLink
-                    }
-
-                    modal_navbar_jsx={
-                        <Typography variant='body1' sx={{ fontWeight: 600 }}>
-
-                            Image Operations
-
-                        </Typography>
-                    }
-
-                    modal_content_jsx={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
-
-                            <CircularProgress size={20} />
-
-                            <Typography variant='body1'>
-
-                                {imageOperationsData.isProcessing ?
-
-                                    <>
-
-                                        Uploading {imageOperationsData.totalUploading} {imageOperationsData.totalUploading < 2 ? 'image' : 'images'}
-
-                                    </>
-
-                                    :
-
-                                    "Updating the rich text editor's generated output"
-
-                                }
-
-                            </Typography>
-
-                        </Box>
-                    }
-
-                    user_can_close_the_modal={false}
+                {/* Showing non closeable modal when async operation is going on */}
+                <ASYNC_OPERATION_INDICATOR___CHILD
+                    imageOperationsData={imageOperationsData} is_loading_while_submitting_the_note={is_loading_while_submitting_the_note}
                 />
 
 
@@ -321,3 +241,74 @@ export default function CREATE_NOTE___COMPONENT() {
     )
 }
 
+
+
+/*__________________________________________
+
+ ✅ Child Component of <CREATE_NOTE___COMPONENT/>
+____________________________________________*/
+
+function ASYNC_OPERATION_INDICATOR___CHILD({ imageOperationsData, is_loading_while_submitting_the_note }) {
+
+    return (
+
+        <MODAL___REUSABLE
+            modal_is_open={
+                // image operation is going on
+                (imageOperationsData.isProcessing && imageOperationsData.totalUploading > 0)
+
+                ||
+
+                // or output is getting updated with the imageLink
+                imageOperationsData.updatingTheOutputWithImageLink
+
+                ||
+
+                // or submitting the form
+                is_loading_while_submitting_the_note
+            }
+
+            modal_navbar_jsx={
+                <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    Note Submission
+                </Typography>
+            }
+
+            modal_content_jsx={
+                <Box sx={{
+
+                    padding: '2rem',
+
+                    width: { xs: '17rem', sm: '20rem', md: '25rem' },
+
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                }}>
+
+                    <CircularProgress size={20} />
+
+
+                    <Typography variant='body1'>
+
+                        {imageOperationsData.isProcessing &&
+
+                            <>
+                                Uploading {imageOperationsData.totalUploading} {imageOperationsData.totalUploading < 2 ? 'image' : 'images'}
+                            </>
+
+                        }
+
+                        {imageOperationsData.updatingTheOutputWithImageLink && "Updating the rich text editor's generated output"}
+
+                        {is_loading_while_submitting_the_note && "Submitting the note"}
+
+                    </Typography>
+
+                </Box>
+            }
+
+            user_can_close_the_modal={false}
+        />
+    )
+}

@@ -67,7 +67,7 @@ export default function HEADER_1___COMPONENT() {
                 },
             }}
 
-            background_color={{ light: 1, dark: 1 }}>
+            background_color={{ light: 0, dark: 0 }}>
 
             <CALL_TO_ACTION_SECTION___STYLED>
 

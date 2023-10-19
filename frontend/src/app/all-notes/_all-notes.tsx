@@ -1,4 +1,5 @@
 'use client'
+
 /*__________________________________________
 
  ✅ import
@@ -14,16 +15,19 @@ import { useUpdateEffect } from "react-use"
 // api hook
 import { useFetchUserNotes } from "@/api-calls/note/fetch-all-note-of-a-user-hook"
 import { useDeleteNotes } from '@/api-calls/note/delete-notes-hook'
+import { useAddOrRemoveNoteBookmark } from "@/api-calls/note/add-to-bookmark-or-remove-from-bookmark-hook"
+
+// theme hook
+import { useTheme } from '@mui/material/styles'
 
 // form hook
 import useFormManagement, { type_of_form_configuration } from "@/utils/global-hooks/use-form-management"
 
 // store
-import { note_store, note_store_actions } from "@/store/note-store/note-store"
+import { note_store, note_store_actions } from "@/store/note-store"
 
 // utils
 import log_in_dev_env from "@/utils/log/log-in-dev-env-util"
-
 
 // route
 import ROUTER_NAVIGATION___COMPONENT from "@/utils/route/router-navigation"
@@ -33,14 +37,19 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ClearIcon from '@mui/icons-material/Clear'
 import NoteAddIcon from '@mui/icons-material/NoteAdd'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import BookmarkAddRoundedIcon  from "@mui/icons-material/BookmarkAddRounded"
+import BookmarkRemoveRoundedIcon from "@mui/icons-material/BookmarkRemoveRounded"
 
 // styled components
 import MODAL_CONTENT_WRAPPER___STYLED from "@/components/styled/for-any-project/modal-content-wrapper"
-import CONTAINER___STYLED from "@/components/styled/for-any-project/container"
-import BUTTON_TINTED___STYLED from "@/components/styled/for-any-project/tinted-button"
+import WRAPPER_OF_NOTES___STYLED from "@/components/styled/just-for-this-project/wrapper-of-notes"
+import WRAPPER_OF_NOTE_CARD___STYLED from "@/components/styled/just-for-this-project/wrapper-of-note-card"
+import NO_TEXT_ICON_BUTTON___STYLED from "@/components/styled/just-for-this-project/no-text-icon-button"
 
 // mui components
-import { Box, Stack, Typography, Button, Pagination } from "@mui/material"
+import { Box, Stack, Typography, Button, Pagination, Tooltip, IconButton, CircularProgress } from "@mui/material"
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef } from '@mui/x-data-grid'
 
@@ -59,13 +68,19 @@ import MUI_RADIO___COMPONENT from "@/components/reusable/for-any-project/form/mu
 ____________________________________________*/
 export default function ALL_NOTES___COMPONENT() {
 
+    // useFetchUserNotes
+    const { 
+        refetch,
+        fetchStatus,
+        isFetching,
+        isSuccess,
+        isError,
+        error,
+        data
+    } = useFetchUserNotes()
 
 
-    // 🍪 useFetchUserNotes
-    const { refetch, data, isFetching, isSuccess, isError } = useFetchUserNotes()
-
-
-    // 🍪 note store
+    // note store
     const { sort, limit, page } = note_store(state => ({
         sort: state?.note?.query_params?.sort,
         limit: state?.note?.query_params?.limit,
@@ -73,14 +88,30 @@ export default function ALL_NOTES___COMPONENT() {
     }))
 
 
-    // 🍪 fetch on mount and when specific query params changes
+    // fetch on mount and when specific query params changes
     useEffect(() => {
 
         refetch()
 
-        log_in_dev_env('refetch has done')
-
     }, [sort, limit, page])
+
+    
+
+    useEffect(() => {
+
+        if (isError) {
+
+            let error_message = (error as any).response.data.message
+
+            let total_pages = error_message.match(/Total pages available: \d+/)?.[0].split(":")[1]?.trim();
+
+            if (total_pages) {
+                note_store_actions.note.update_query_param_page(total_pages)
+            }
+        }
+
+    }, [fetchStatus])
+
 
 
     // ✅ TSX
@@ -88,6 +119,7 @@ export default function ALL_NOTES___COMPONENT() {
         <>
 
             <NOTE_NAVIGATION_TABS___REUSABLE />
+
 
             {
 
@@ -100,7 +132,8 @@ export default function ALL_NOTES___COMPONENT() {
                     }
 
 
-                    else if (isError) {
+                    else if (isError && !(error as any).response.data.message.toLowerCase().includes('total pages')) {
+                    
 
                         return (
                             <Box sx={{ marginTop: '5rem' }}>
@@ -116,7 +149,7 @@ export default function ALL_NOTES___COMPONENT() {
 
                         return (
 
-                            <FETCHED_NOTES___CHILD data={data} refetch={refetch} />
+                            <FETCHED_NOTES___CHILD note_data={data.fetched_documents} pagination_info={data.info} refetch={refetch} />
 
                         )
                     }
@@ -131,53 +164,25 @@ export default function ALL_NOTES___COMPONENT() {
 
 
 
-
-
 /*__________________________________________
 
- ✅ Child components of 
+ ✅ Child component of 
  <ALL_NOTES___COMPONENT/>
 ____________________________________________*/
 
-// 🍪 
-function FETCHED_NOTES___CHILD({ data, refetch }) {
-
-    // state to handle active multi delete UI
-    const [activate_bulk_delete_ui, set_activate_bulk_delete_ui] = useState(false)
-
+function FETCHED_NOTES___CHILD({ note_data, pagination_info, refetch }) {
 
     // TSX
     return (
 
         <>
-            {data.fetched_documents.length === 0 ?
+            {note_data.length === 0 ?
 
                 <NO_NOTES_AVAILABLE___CHILD />
 
                 :
 
-                <WRAPPER_OF_FETCHED_NOTES___STYLED>
-
-                    <WRAPPER_OF_FILTER_DELETE_AND_NOTES>
-
-                        <WRAPPER_OF_FILTER_AND_DELETE>
-
-                            <FILTER___CHILD />
-
-                            <BULK_DELETE_BUTTON___CHILD activate_bulk_delete_ui={activate_bulk_delete_ui}
-                                set_activate_bulk_delete_ui={set_activate_bulk_delete_ui} />
-
-                        </WRAPPER_OF_FILTER_AND_DELETE>
-
-
-                        <NOTES___CHILD all_notes_data={data.fetched_documents} activate_bulk_delete_ui={activate_bulk_delete_ui} refetch={refetch} />
-
-                    </WRAPPER_OF_FILTER_DELETE_AND_NOTES>
-
-
-                    <PAGINATION___CHILD total_pages={data.info.total_pages} />
-
-                </WRAPPER_OF_FETCHED_NOTES___STYLED>
+                <DISPLAY_FETCHED_NOTES___CHILD note_data={note_data} pagination_info={pagination_info} refetch={refetch}/>
             }
 
         </>
@@ -188,16 +193,14 @@ function FETCHED_NOTES___CHILD({ data, refetch }) {
 
 /*__________________________________________
 
- ✅ Child components of 
- <FETCHED_NOTES___CHILD/>
+ ✅ Child component of 
+ <DISPLAY_FETCHED_NOTES___CHILD/>
 ____________________________________________*/
 
-
-// 🍪
 function NO_NOTES_AVAILABLE___CHILD() {
 
     return (
-        <WRAPPER_OF_FETCHED_NOTES___STYLED>
+        <WRAPPER_OF_NOTES___STYLED>
 
             <Typography
                 variant='body1'
@@ -209,42 +212,147 @@ function NO_NOTES_AVAILABLE___CHILD() {
 
             <ROUTER_NAVIGATION___COMPONENT href={config_obj.page_path.create_note}>
 
-                <BUTTON_TINTED___STYLED
+                <Button
                     startIcon={<NoteAddIcon />}>
                     Create a New Note
-                </BUTTON_TINTED___STYLED>
+                </Button>
             </ROUTER_NAVIGATION___COMPONENT>
 
-        </WRAPPER_OF_FETCHED_NOTES___STYLED>
+        </WRAPPER_OF_NOTES___STYLED>
     )
 }
 
 
-// 🍪
-function BULK_DELETE_BUTTON___CHILD({ activate_bulk_delete_ui, set_activate_bulk_delete_ui }) {
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <FETCHED_NOTES___CHILD/>
+____________________________________________*/
+
+function DISPLAY_FETCHED_NOTES___CHILD({
+    note_data,
+    pagination_info,
+    refetch
+}) {
 
     return (
 
-        <BUTTON_TINTED___STYLED
-            onClick={() => set_activate_bulk_delete_ui(!activate_bulk_delete_ui)}
-            startIcon={
-                !activate_bulk_delete_ui ?
-                    <DeleteIcon sx={{ fontSize: '1.5rem' }} />
-                    :
-                    <ClearIcon sx={{ fontSize: '1.5rem' }} />
+        <WRAPPER_OF_NOTES___STYLED>
+
+            <FILTER_DELETE_BUTTON_AND_NOTES___CHILD note_data={note_data} refetch={refetch}/>
+
+
+            {note_data.length > 0 &&
+
+                <PAGINATION___CHILD pagination_info={pagination_info} />
             }
-        >
-            {
-                !activate_bulk_delete_ui ?
-                    'Activate Bulk Delete' :
-                    'Deactivate Bulk Delete'
-            }
-        </BUTTON_TINTED___STYLED>
+
+
+        </WRAPPER_OF_NOTES___STYLED>
+
     )
 }
 
 
-// 🍪
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <DISPLAY_FETCHED_NOTES___CHILD/>
+____________________________________________*/
+
+function FILTER_DELETE_BUTTON_AND_NOTES___CHILD({note_data, refetch}) {
+
+    // state to handle active multi delete UI
+    const [activate_bulk_delete_ui, set_activate_bulk_delete_ui] = useState(false)
+
+
+    return (
+
+        <WRAPPER_OF_FILTER_DELETE_AND_NOTES___STYLED>
+
+            <WRAPPER_OF_FILTER_AND_DELETE___STYLED>
+
+                <FILTER___CHILD />
+
+                <BULK_DELETE_BUTTON___CHILD 
+                    activate_bulk_delete_ui={activate_bulk_delete_ui}
+                    set_activate_bulk_delete_ui={set_activate_bulk_delete_ui} 
+                />
+
+            </WRAPPER_OF_FILTER_AND_DELETE___STYLED>
+
+
+            <NOTES___CHILD all_notes_data={note_data} activate_bulk_delete_ui={activate_bulk_delete_ui} refetch={refetch} />
+
+        </WRAPPER_OF_FILTER_DELETE_AND_NOTES___STYLED>
+
+
+    )
+}
+
+
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <DISPLAY_FETCHED_NOTES___CHILD/>
+____________________________________________*/
+function PAGINATION___CHILD({ pagination_info }) {
+
+    // note store
+    const { page } = note_store(state => ({
+        page: state?.note?.query_params?.page
+    }))
+
+    
+    // update store
+    const handleChange = (event, value) => {
+        note_store_actions.note.update_query_param_page(value)
+    }
+
+
+    // Pagination Info
+    const total_pages = pagination_info.total_pages
+    const total_notes = pagination_info.total_documents
+    const showing_range_start = pagination_info.current_documents_range.start
+    const showing_range_end = pagination_info.current_documents_range.end
+    
+
+
+    return (
+
+        <Stack spacing='1rem' alignItems='center'sx={{textAlign:'center'}}>
+
+            <Pagination
+                color="primary"
+                onChange={handleChange}
+                count={total_pages}
+                page={Number(page)}
+                variant="outlined"
+            />
+
+            <Typography variant='subtitle2' color='primary'>
+                Showing { 
+                    showing_range_start === showing_range_end ? 
+                    `${showing_range_start}` : 
+                    `${showing_range_start}–${showing_range_end}`
+                } of {total_notes}
+            </Typography>
+
+        </Stack>
+
+    )
+
+}
+
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <FILTER_DELETE_BUTTON_AND_NOTES___CHILD/>
+____________________________________________*/
 function FILTER___CHILD() {
 
 
@@ -267,11 +375,11 @@ function FILTER___CHILD() {
 
         <>
 
-            <BUTTON_TINTED___STYLED
+            <Button
                 onClick={handle_click_on_the_filter_button}
                 startIcon={<FilterAltIcon sx={{ fontSize: '1.5rem' }} />}>
                 Filter & Sort
-            </BUTTON_TINTED___STYLED>
+            </Button>
 
 
 
@@ -299,9 +407,7 @@ function FILTER___CHILD() {
                         variant="outlined">
                         Apply
                     </Button>
-
                 }
-
 
             />
 
@@ -313,7 +419,39 @@ function FILTER___CHILD() {
 }
 
 
-// 🍪 
+/*__________________________________________
+
+ ✅ Child component of 
+ <DISPLAY_FETCHED_NOTES___CHILD/>
+____________________________________________*/
+function BULK_DELETE_BUTTON___CHILD({ activate_bulk_delete_ui, set_activate_bulk_delete_ui }) {
+
+    return (
+
+        <Button
+            onClick={() => set_activate_bulk_delete_ui(!activate_bulk_delete_ui)}
+            startIcon={
+                !activate_bulk_delete_ui ?
+                    <DeleteIcon sx={{ fontSize: '1.5rem' }} />
+                    :
+                    <ClearIcon sx={{ fontSize: '1.5rem' }} />
+            }
+        >
+            {
+                !activate_bulk_delete_ui ?
+                    'Activate Bulk Delete' :
+                    'Deactivate Bulk Delete'
+            }
+        </Button>
+    )
+}
+
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <FILTER_DELETE_BUTTON_AND_NOTES___CHILD/>
+____________________________________________*/
 function NOTES___CHILD({ all_notes_data, activate_bulk_delete_ui, refetch }) {
 
 
@@ -342,55 +480,7 @@ function NOTES___CHILD({ all_notes_data, activate_bulk_delete_ui, refetch }) {
             }
 
 
-
-
-
         </Stack>
-
-    )
-
-}
-
-
-// 🍪
-function PAGINATION___CHILD({ total_pages }) {
-
-    // note store
-    const { page } = note_store(state => ({
-        page: state?.note?.query_params?.page
-    }))
-
-
-    // state to track UI pagination change
-    const [page_state, set_page_state] = useState(page)
-
-
-    const handleChange = (event, value) => {
-        set_page_state(value)
-    }
-
-
-
-    // on change of "page_state", updating "note_store.note.query_params.page" state
-    useUpdateEffect(() => {
-
-        note_store_actions.note.update_query_param_page(page_state)
-
-    }, [page_state])
-
-
-    return (
-
-        <>
-
-            <Pagination
-                onChange={handleChange}
-                count={total_pages}
-                page={Number(page_state)}
-                variant="outlined"
-            />
-
-        </>
 
     )
 
@@ -403,8 +493,6 @@ function PAGINATION___CHILD({ total_pages }) {
  ✅ Child components of 
  <FILTER___CHILD/>
 ____________________________________________*/
-
-// 🍪
 function FILTER_MODAL_CONTENT___CHILD({ is_filter_modal_open }) {
 
 
@@ -467,7 +555,7 @@ function FILTER_MODAL_CONTENT___CHILD({ is_filter_modal_open }) {
 
         note_store_actions.note.update_query_param_sort(formState?.form_data?.sort?.value)
 
-
+    
     }, [is_filter_modal_open])
 
 
@@ -557,11 +645,10 @@ function FILTER_MODAL_CONTENT___CHILD({ is_filter_modal_open }) {
 
 /*__________________________________________
 
- ✅ Child components of 
+ ✅ Child component of 
  <NOTES___CHILD/>
 ____________________________________________*/
 
-// 🍪
 function NOTE_CARD___CHILD({ note_data }) {
 
     return (
@@ -582,19 +669,23 @@ function NOTE_CARD___CHILD({ note_data }) {
 
                 <ROUTER_NAVIGATION___COMPONENT href={config_obj.page_path.read_note(note_data._id)}>
 
-                    <BUTTON_TINTED___STYLED sx={{ width: 'fit-content', }}>
-                        Read
-                    </BUTTON_TINTED___STYLED>
+                    <NO_TEXT_ICON_BUTTON___STYLED tooltip_title='Read'>
+                        <VisibilityIcon sx={{fontSize:'1.5rem'}}/>
+                    </NO_TEXT_ICON_BUTTON___STYLED>
+            
                 </ROUTER_NAVIGATION___COMPONENT>
 
 
                 <ROUTER_NAVIGATION___COMPONENT href={config_obj.page_path.edit_note(note_data._id)}>
 
-                    <BUTTON_TINTED___STYLED sx={{ width: 'fit-content', }}>
-                        Edit
-                    </BUTTON_TINTED___STYLED>
-
+                    <NO_TEXT_ICON_BUTTON___STYLED tooltip_title='Edit'>
+                        <EditRoundedIcon sx={{fontSize:'1.5rem'}}/>
+                    </NO_TEXT_ICON_BUTTON___STYLED>
+            
                 </ROUTER_NAVIGATION___COMPONENT>
+
+
+                <BOOKMARK___CHILD note_data={note_data}/>
 
             </Stack>
 
@@ -603,7 +694,12 @@ function NOTE_CARD___CHILD({ note_data }) {
 }
 
 
-// 🍪
+
+/*__________________________________________
+
+ ✅ Child component of 
+ <NOTES___CHILD/>
+____________________________________________*/
 function NOTE_BULK_DELETE___CHILD({ all_notes_data, refetch }) {
 
     // useDeleteNotes
@@ -698,7 +794,7 @@ function NOTE_BULK_DELETE___CHILD({ all_notes_data, refetch }) {
     // refetch the notes again on successful deletion
     useEffect(() => {
 
-        if (!isDeletedSuccessfully) return
+        if(!isDeletedSuccessfully) return
 
         refetch()
 
@@ -714,19 +810,20 @@ function NOTE_BULK_DELETE___CHILD({ all_notes_data, refetch }) {
             <Stack direction='row' alignItems='center' justifyContent='space-between'>
 
                 <Typography
-                    variant='body1'
+                    variant='body2'
                     color={selectionCount === 0 ? 'text.secondary' : 'text.primary'}>
                     Number of selected notes: {selectionCount}
                 </Typography>
 
-                <BUTTON_TINTED___STYLED
+                <Button
+                    startIcon={<DeleteIcon/>}
                     onClick={handleNotesDeletion}
                     color='error'
                     disabled={selectionCount === 0 || isDeleting}>
 
                     {!isDeleting ? 'Delete' : 'Deleting...'}
 
-                </BUTTON_TINTED___STYLED>
+                </Button>
 
             </Stack>
 
@@ -778,47 +875,109 @@ function NOTE_BULK_DELETE___CHILD({ all_notes_data, refetch }) {
 
 /*__________________________________________
 
- ✅ Styled components of 
- <FETCHED_NOTES___CHILD/>
+ ✅ Child Component of 
+ <NOTE___CHILD/>
 ____________________________________________*/
 
-// 🍪
-function WRAPPER_OF_FETCHED_NOTES___STYLED({ children }) {
+function BOOKMARK___CHILD({note_data}) {
 
+    // useAddOrRemoveNoteBookmark
+    const { refetch, data, fetchStatus, status, isFetching} = useAddOrRemoveNoteBookmark(note_data._id)
+
+
+    // Click to Add to Bookmark or Remove from Bookmark Button
+    const handle_click_on_the_bookmark_icon = () => {
+        refetch()
+    }
+
+
+    // is_bookmarked state
+    const [is_bookmarked, set_is_bookmarked] = useState(note_data.is_bookmarked)
+
+
+    // Update the state
+    useEffect(()=>{
+
+        if(status==='success') {
+
+            if(data.message.includes('unbookmarked')) {
+                set_is_bookmarked(false)
+            }
+            else{
+                set_is_bookmarked(true)
+            }
+        }
+    
+    },[fetchStatus])
+
+
+    // Update the state
+    useEffect(()=>{
+
+        if(status==='success') {
+
+            if(data.message.includes('unbookmarked')) {
+                set_is_bookmarked(false)
+            }
+            else{
+                set_is_bookmarked(true)
+            }
+        }
+    
+    },[fetchStatus])
+
+
+
+    // TSX
     return (
 
-        <CONTAINER___STYLED
-            elevation={{ light: { value: 1 }, dark: { value: 1 } }}
 
-            background_color={{ light: 1, dark: 1 }}
+       <>
 
-            size='extra_large'
+           {isFetching?
 
-            center={{ horizontal: true, vertical: false }}
+               <Tooltip title='Loading...'>
+                    <IconButton>
+                        <CircularProgress size='1.5rem'/>
+                    </IconButton>
+               </Tooltip>
 
-            sx={{
-                /* Layout */
-                marginTop: '2rem',
-                padding: '1rem',
+               :
 
+                (is_bookmarked ?
+                    
+                    <NO_TEXT_ICON_BUTTON___STYLED tooltip_title='Remove Bookmark' onClick={handle_click_on_the_bookmark_icon}>
+                        <BookmarkRemoveRoundedIcon sx={{fontSize:'1.5rem'}}/>
+                    </NO_TEXT_ICON_BUTTON___STYLED>
+    
 
-                /* Child Layout */
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '1.5rem'
-            }}>
+                    :
 
-            {children}
+                    <NO_TEXT_ICON_BUTTON___STYLED tooltip_title='Bookmark' onClick={handle_click_on_the_bookmark_icon}>
+                        <BookmarkAddRoundedIcon sx={{fontSize:'1.5rem'}}/>
+                    </NO_TEXT_ICON_BUTTON___STYLED>
 
-        </CONTAINER___STYLED>
+                )   
+
+           }
+       
+       </>
 
     )
+
 }
 
 
+
+
+/*__________________________________________
+
+ ✅ Styled components of 
+ <FILTER_DELETE_BUTTON_AND_NOTES___CHILD/> 
+____________________________________________*/
+
 // 🍪
-function WRAPPER_OF_FILTER_DELETE_AND_NOTES({ children }) {
+function WRAPPER_OF_FILTER_DELETE_AND_NOTES___STYLED({ children }) {
 
     return (
         <Stack spacing='1.5rem' sx={{ width: '100%' }}>
@@ -829,7 +988,7 @@ function WRAPPER_OF_FILTER_DELETE_AND_NOTES({ children }) {
 
 
 // 🍪
-function WRAPPER_OF_FILTER_AND_DELETE({ children }) {
+function WRAPPER_OF_FILTER_AND_DELETE___STYLED({ children }) {
 
     return (
         <Box
@@ -845,46 +1004,6 @@ function WRAPPER_OF_FILTER_AND_DELETE({ children }) {
     )
 }
 
-
-
-
-/*__________________________________________
-
- ✅ Styled components of 
- <NOTE_CARD___CHILD/>
-____________________________________________*/
-
-
-// 🍪
-function WRAPPER_OF_NOTE_CARD___STYLED({ children }) {
-
-    return (
-
-        <CONTAINER___STYLED
-            elevation={{ light: { value: 1 }, dark: { value: 1 } }}
-
-            background_color={{ light: 0, dark: 0 }}
-
-            size='large'
-
-            sx={{
-                /* Layout */
-                padding: '1rem',
-
-
-                /* Child Layout */
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', md: '3fr 1fr' },
-                alignItems: { xs: 'stretch', md: 'center' },
-                gap: '1.5rem'
-            }}>
-
-            {children}
-
-        </CONTAINER___STYLED>
-
-    )
-}
 
 
 

@@ -6,10 +6,14 @@
 ____________________________________________*/
 
 // config
-import config_obj from "@/config"
+import config_obj from '@/config'
 
-// form management hook
-import useFormManagement, { type_of_form_configuration } from "@/utils/global-hooks/use-form-management"
+// types
+import { Theme } from '@mui/material'
+
+// hook
+import { useEffect } from 'react'
+import { useImmer } from 'use-immer'
 
 // api hook
 import { useFetchNote } from '@/api-calls/note/fetch-a-note'
@@ -37,11 +41,6 @@ const RichTextEditor = dynamic(
 import useRichTextEditor from 'rich-text-editor-for-react/hook'
 
 
-
-// types
-import { Theme } from '@mui/material'
-
-
 // styled components
 import CONTAINER___STYLED from '@/components/styled/for-any-project/container'
 
@@ -51,11 +50,10 @@ import { Box, Button, Typography, FormLabel, CircularProgress } from "@mui/mater
 
 
 // reusable components
-import MUI_INPUT___COMPONENT from '@/components/reusable/for-any-project/form/mui-input'
 import LOADING_SPINNER___REUSABLE from "@/components/reusable/for-any-project/loading-spinner/loading-spinner"
 import ERROR_TEXT___REUSABLE from "@/components/reusable/for-any-project/error-text/error-text"
 import MODAL___REUSABLE from '@/components/reusable/for-any-project/modal/modal'
-import { useEffect } from 'react'
+import NOTE_TITLE___REUSABLE from '@/components/reusable/just-for-this-project/note-title'
 
 
 
@@ -126,11 +124,9 @@ export default function EDIT_NOTE___COMPONENT() {
 
 
 
-
-
 /*__________________________________________
 
- ✅ Child Components of
+ ✅ Child Component of
 <EDIT_NOTE___COMPONENT/>
 ____________________________________________*/
 
@@ -157,87 +153,51 @@ function UPDATE_NOTE___CHILD({ note_data }) {
     } = useRichTextEditor()
 
 
-
-
     // theme
     const theme: Theme = useTheme()
 
-
-
     // useUpdateNote
-    const { mutate, isLoading: is_loading_while_submitting_note } = useUpdateNote()
+    const { mutate, isLoading: is_loading_while_submitting_the_note } = useUpdateNote()
+
+
+    // note title state
+    const [note_title_state, update_note_title_state] = useImmer({
+        value: note_data.title,
+        validation_error: false
+    })
 
 
 
-
-    // 🍪 form state management (1/3 Steps) - form_configuration 🍪
-    const form_configuration: type_of_form_configuration = {
-
-        /* 🥔 title  🥔 */
-        title: {
-
-            component_type: 'input',
-
-            value: note_data.title,
-
-            is_required: true,
-
-            validation: {
-                is_validating: true,
-                match_pattern: /^[^]{1,60}$/,
-                error_message: "Title can't be longer than 60 characters."
-            }
-
-        }
-
-    }
-
-
-    // 🍪 form state management (2/2 Steps) - useFormManagement 🍪
-    const {
-        formState,
-        updateFormState,
-        actions,
-        validation_info,
-        validation_before_form_submission_func
-
-    } = useFormManagement(form_configuration)
-
-
-
-    // 🍪 handleSubmit
+    // handleSubmit
     const handleSubmit = async (event) => {
 
-        // 🥔 stop refreshing the page on reload 🥔
+        // stop refreshing the page on reload 
         event.preventDefault()
 
+        // can't submit if note title input field is containing error,
+        if (note_title_state.validation_error) return
 
-        /* 🥔 if 'validation_before_form_submission_func' function returns true, that means there is at least one validation error in the form and we can not submit the form 🥔 */
-        if (validation_before_form_submission_func() === true) return
-
-
-        // 🥔 execute image operations 🥔
+        // execute image operations 
         executeImageOperations()
-
     }
 
 
 
 
-    /* 🍪 after output gets updated with image link */
+    /* After output gets updated with image link */
     useEffect(() => {
 
 
         if (imageOperationsData.outputUpdatedWithImageLink === '') return
 
 
-        // 🥔 API request  🥔
+        // API request  
         const user_input: type_of_user_input_of_update_note_hook = {
 
             note_id: note_data._id,
 
             note_data: {
-                "title": formState.form_data.title.value,
+                "title": note_title_state.value,
                 "description": output,
                 "public_id_of_cloudinary_images": imageOperationsData.idsOfTheImages
             }
@@ -257,9 +217,9 @@ function UPDATE_NOTE___CHILD({ note_data }) {
 
         <CONTAINER___STYLED
 
-            elevation={{ light: { value: 0 }, dark: { value: 0 } }}
+            elevation={{ light: { value: 1 }, dark: { value: 0 } }}
 
-            background_color={{ light: 1, dark: 1 }}
+            background_color={{ light: 0, dark: 1 }}
 
             sx={{
                 /* Layout */
@@ -276,23 +236,10 @@ function UPDATE_NOTE___CHILD({ note_data }) {
             }}>
 
 
-            {/*  note title  */}
-            <MUI_INPUT___COMPONENT
-
-                label='Note Title'
-
-                input_name='title'
-
-                state={formState}
-
-                actions={actions}
-
-                validation_info={validation_info}
-
-                // optional
-                multiline={false}
-                variant_value='outlined' //standard, filled, outlined
-
+            {/* note title */}
+            <NOTE_TITLE___REUSABLE
+                note_title_state={note_title_state}
+                update_note_title_state={update_note_title_state}
             />
 
 
@@ -308,7 +255,7 @@ function UPDATE_NOTE___CHILD({ note_data }) {
                     initialValue={note_data.description}
 
                     customizeUI={{
-                        backgroundColor: theme.palette.background.variation_1,
+                        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.variation_1 : theme.palette.background.default,
                         primaryColor: theme.palette.primary.main,
                         stickyToolbarOnScroll: true
                     }}
@@ -346,59 +293,10 @@ function UPDATE_NOTE___CHILD({ note_data }) {
             </Button>
 
 
-
-
-            {/* Showing non closeable modal when image operation is going on */}
-            <MODAL___REUSABLE
-                modal_is_open={
-                    // image operation is going on
-                    (imageOperationsData.isProcessing && (imageOperationsData.totalUploading > 0 || imageOperationsData.totalDeleting > 0))
-
-                    ||
-
-                    // or output is getting updated with the imageLink
-                    imageOperationsData.updatingTheOutputWithImageLink
-                }
-
-                modal_navbar_jsx={
-                    <Typography variant='body1' sx={{ fontWeight: 600 }}>
-                        Image Operations
-
-                    </Typography>
-                }
-
-                modal_content_jsx={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
-
-                        <CircularProgress size={20} />
-
-
-                        <Typography variant='body1'>
-
-                            {imageOperationsData.isProcessing ?
-
-                                <>
-                                    Uploading {imageOperationsData.totalUploading} {imageOperationsData.totalUploading < 2 ? 'image' : 'images'}
-
-                                    <span style={{ marginLeft: '0.35rem' }}>
-                                        and Deleting  {imageOperationsData.totalDeleting} {imageOperationsData.totalDeleting < 2 ? 'image' : 'images'}
-                                    </span>
-
-                                </>
-
-                                :
-
-                                "Updating the rich text editor's generated output"
-                            }
-
-                        </Typography>
-
-                    </Box>
-                }
-
-                user_can_close_the_modal={false}
+            {/* Showing non closeable modal when async operation is going on */}
+            <ASYNC_OPERATION_INDICATOR___CHILD
+                imageOperationsData={imageOperationsData} is_loading_while_submitting_the_note={is_loading_while_submitting_the_note}
             />
-
 
 
         </CONTAINER___STYLED>
@@ -408,4 +306,78 @@ function UPDATE_NOTE___CHILD({ note_data }) {
 
 
 
+/*__________________________________________
+
+ ✅ Child Component of <UPDATE_NOTE___CHILD/>
+____________________________________________*/
+
+function ASYNC_OPERATION_INDICATOR___CHILD({ imageOperationsData, is_loading_while_submitting_the_note }) {
+
+    return (
+
+        <MODAL___REUSABLE
+            modal_is_open={
+                // image operation is going on
+                (imageOperationsData.isProcessing && (imageOperationsData.totalUploading > 0 || imageOperationsData.totalDeleting > 0))
+
+                ||
+
+                // or output is getting updated with the imageLink
+                imageOperationsData.updatingTheOutputWithImageLink
+
+                ||
+
+                // or submitting the form
+                is_loading_while_submitting_the_note
+            }
+
+            modal_navbar_jsx={
+                <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    Note Submission
+                </Typography>
+            }
+
+            modal_content_jsx={
+                <Box sx={{
+
+                    padding: '2rem',
+
+                    width: { xs: '17rem', sm: '20rem', md: '25rem' },
+
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                }}>
+
+                    <CircularProgress size={20} />
+
+
+                    <Typography variant='body1'>
+
+                        {imageOperationsData.isProcessing &&
+
+                            <>
+                                Uploading {imageOperationsData.totalUploading} {imageOperationsData.totalUploading < 2 ? 'image' : 'images'}
+
+                                <span style={{ marginLeft: '0.35rem' }}>
+                                    and Deleting  {imageOperationsData.totalDeleting} {imageOperationsData.totalDeleting < 2 ? 'image' : 'images'}
+                                </span>
+
+                            </>
+
+                        }
+
+                        {imageOperationsData.updatingTheOutputWithImageLink && "Updating the rich text editor's generated output"}
+
+                        {is_loading_while_submitting_the_note && "Submitting the note"}
+
+                    </Typography>
+
+                </Box>
+            }
+
+            user_can_close_the_modal={false}
+        />
+    )
+}
 
