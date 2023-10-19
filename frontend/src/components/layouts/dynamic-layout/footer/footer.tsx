@@ -1,3 +1,8 @@
+/*__________________________________________
+
+ ✅ types
+____________________________________________*/
+
 // types
 import { type_of_obj_with_any_values } from '@/types/commonly-used-types'
 
@@ -65,7 +70,7 @@ export default function DYNAMIC_FOOTER___COMPONENT(props: type_of_dynamic_footer
                 light: { value: 4 },
                 dark: { value: 4 },
             }}
-            background_color={{ light: 1, dark: 1 }}
+            background_color={{ light: 0, dark: 0 }}
         >
 
             {Object.keys(footer_data).length !== 0 ?

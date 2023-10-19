@@ -20,6 +20,8 @@ ____________________________________________*/
 type type_of_error_text_props = {
 
     error_text: string,
+    error_icon_size?: string
+    typography?: 'h5'  | 'h6'  | 'body1'  | 'body2'  | 'subtitle1'  | 'subtitle2'
 }
 
 
@@ -29,7 +31,7 @@ type type_of_error_text_props = {
 ____________________________________________*/
 export default function ERROR_TEXT___COMPONENT(props:type_of_error_text_props) {
 
-    const {error_text} = props
+    const {error_text, typography, error_icon_size} = props
 
 
     
@@ -55,14 +57,14 @@ ____________________________________________*/
 
             <ErrorIcon sx={(theme) => ({
                 color: theme.palette.error.light,
-                fontSize: '2rem'
+                fontSize: error_icon_size ? error_icon_size :'2rem'
             })} />
 
 
             <Typography sx={(theme) => ({
                 color: theme.palette.error.main,
             })}
-                variant='h6'>
+                variant={typography? typography : 'h6'}>
                 {error_text}
             </Typography>
 

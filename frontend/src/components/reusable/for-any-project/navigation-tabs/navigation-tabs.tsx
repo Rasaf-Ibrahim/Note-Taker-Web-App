@@ -16,6 +16,7 @@ import ROUTER_NAVIGATION___COMPONENT from '@/utils/route/router-navigation'
 
 // components
 import { Box, Tabs, Tab, Divider } from '@mui/material';
+import { type_of_single_element_jsx } from '@/types/commonly-used-types';
 
 
 /*__________________________________________
@@ -24,16 +25,20 @@ import { Box, Tabs, Tab, Divider } from '@mui/material';
 ____________________________________________*/
 
 
-type type_of_tabs_info = {
-    label: string
-    href: string
-}[]
-
-
-type type_of_payload = {
-    tabs_info: type_of_tabs_info
+type type_of_tab_info = {
+    tab_name_jsx: type_of_single_element_jsx
+    tab_href: string,
+    tab_icon_jsx?: type_of_single_element_jsx
 }
 
+type type_of_tab_style = {
+    bottom_border_size?: 'short' | 'long' | 'none'
+}
+
+type type_of_payload = {
+    tabs_info: type_of_tab_info[],
+    tab_style?: type_of_tab_style
+}
 
 
 
@@ -45,30 +50,31 @@ ____________________________________________*/
 export default function NAVIGATION_TABS___REUSABLE(props:type_of_payload) {
 
     // props
-    const { tabs_info } = props
+    const { tabs_info, tab_style = {} } = props
 
+    const {
+        bottom_border_size = 'long'
+    } = tab_style
 
+ 
     return (
 
-        <WRAPPER_OF_JSX___STYLED>
+        <WRAPPER_OF_JSX___STYLED bottom_border_size={bottom_border_size}>
 
-            <Box>
+                <ALL_TABS___STYLED bottom_border_size={bottom_border_size}>
 
-                <ALL_TABS___STYLED>
-
-                    {tabs_info.map((tab)=> {
+                    {tabs_info.map((tab_info)=> {
                         return (
                             
-                            <LINK_TAB___CHILD label={tab.label} href={tab.href} key={tab.href}/>
+                            <LINK_TAB___CHILD 
+                                tab_info={tab_info} 
+                                key={tab_info.tab_href}/>
                             
                         )
                     })}
 
                 </ALL_TABS___STYLED>
-
-                <Divider/>
-
-            </Box>
+           
            
         </WRAPPER_OF_JSX___STYLED>
 
@@ -82,7 +88,7 @@ export default function NAVIGATION_TABS___REUSABLE(props:type_of_payload) {
  ✅ Child Component
 ____________________________________________*/
 
-function LINK_TAB___CHILD({ label, href }) {
+function LINK_TAB___CHILD({ tab_info}: {tab_info: type_of_tab_info}) {
 
     // theme
     const theme = useTheme()
@@ -93,7 +99,7 @@ function LINK_TAB___CHILD({ label, href }) {
     const pathname = usePathname()
 
     useMount(() => {
-        if (pathname === href) {
+        if (pathname === tab_info.tab_href) {
             set_is_active(true)
         }
     })
@@ -101,18 +107,21 @@ function LINK_TAB___CHILD({ label, href }) {
 
     return (
 
-        <ROUTER_NAVIGATION___COMPONENT href={href}>
+        <ROUTER_NAVIGATION___COMPONENT href={tab_info.tab_href}>
 
             <Tab
-                label={label}
+                label={tab_info.tab_name_jsx}
+                wrapped
+                icon={tab_info.tab_icon_jsx}
+                iconPosition='top'
 
                 sx={{
                     color: is_active ? theme.palette.primary.main : 'inherit',
                     
-                    borderBottom: is_active ? `0.8px solid ${theme.palette.primary.main}` : null,
-
                     // by default, the opacity is 0.6
-                    opacity: 1
+                    opacity: is_active ? 1 : 0.6,
+                    
+                    borderBottom: is_active ? `0.8px solid ${theme.palette.primary.main}` : null,
                 }}
 
             />
@@ -131,16 +140,24 @@ function LINK_TAB___CHILD({ label, href }) {
 ____________________________________________*/
 
 
-function WRAPPER_OF_JSX___STYLED ({children}) {
+function WRAPPER_OF_JSX___STYLED ({children, bottom_border_size}) {
+
+
+    const theme = useTheme()
+
 
     return (
 
         <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            width:'100%' 
+            display:'flex',
+            justifyContent:'center',
+           
+            ...bottom_border_size === 'long' ? {
+                borderBottom: `2px solid ${theme.palette.divider}`
+            } : {}
         }}>
             {children}
+            
         </Box>
 
     )
@@ -148,7 +165,7 @@ function WRAPPER_OF_JSX___STYLED ({children}) {
 
 
 
-function ALL_TABS___STYLED({children}) {
+function ALL_TABS___STYLED({children, bottom_border_size}) {
 
     // theme
     const theme = useTheme()
@@ -162,7 +179,6 @@ function ALL_TABS___STYLED({children}) {
             allowScrollButtonsMobile
             textColor="primary"
             sx={{
-
                 /* changing some styles of the scroll buttons */
                 '> .MuiTabs-scrollButtons': {
 
@@ -170,8 +186,7 @@ function ALL_TABS___STYLED({children}) {
                     paddingLeft: '0.2rem',
 
                     /* very minimal box-shadow, it work like left and right border */
-                    boxShadow: `0px 0px 1px 1px ${theme.palette.divider}`
-
+                    boxShadow: `0px 0px 1px 1px ${theme.palette.divider}`,
                 },
 
 
@@ -185,7 +200,11 @@ function ALL_TABS___STYLED({children}) {
                 /* if the tabs are scrollable, always want the scroll button to be visible even when they are disable */
                 '> .MuiTabs-scrollButtons.Mui-disabled': {
                     opacity: 0.3
-                }
+                },
+
+                ...bottom_border_size === 'short' ? {
+                    borderBottom: `2px solid ${theme.palette.divider}`
+                } : {}
             }}
 
         >
