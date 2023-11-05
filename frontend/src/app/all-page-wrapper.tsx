@@ -46,7 +46,7 @@ export default function ALL_PAGE_WRAPPER___COMPONENT({ children }) {
                         {children}
 
                         <NETWORK_STATUS___ROOT_LEVEL />
-                        <SERVER_HEALTH_CHECK___ROOT_LEVEL />
+                        {/* <SERVER_HEALTH_CHECK___ROOT_LEVEL /> */}
                         {/* <PARTICLES___REUSABLE/> */}
                         <TOAST_CONTAINER___ROOT_LEVEL />
 
