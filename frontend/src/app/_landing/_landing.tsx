@@ -6,8 +6,8 @@
  ✅ import 
 ____________________________________________*/
 
-import HEADER_1___COMPONENT from "./header/header"
-
+import HERO___COMPONENT from "./hero/hero"
+import FEATURES___COMPONENT from "./features/features"
 
 
 /*__________________________________________
@@ -20,7 +20,9 @@ export default function LANDING___COMPONENT() {
     return (
 
         <>
-            <HEADER_1___COMPONENT />
+            <HERO___COMPONENT />
+
+            <FEATURES___COMPONENT/>
 
         </>
 
